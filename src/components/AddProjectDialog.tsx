@@ -1,11 +1,23 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
@@ -26,14 +38,16 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
     end_date: "",
     team_name: "",
     budget: 0,
-    assigned_members: [] as string[]
+    assigned_members: [] as string[],
   });
-  
+
   const { createProject } = useProjects();
   const { teamMembers } = useTeamMembers();
 
-  // Filter only active team members for selection
-  const activeTeamMembers = teamMembers.filter(member => member.status === "active");
+  // เลือกเฉพาะพนักงานที่ active
+  const activeTeamMembers = teamMembers.filter(
+    (member) => member.status === "active"
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,27 +63,18 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
         end_date: "",
         team_name: "",
         budget: 0,
-        assigned_members: []
+        assigned_members: [],
       });
       setOpen(false);
     } catch (error) {
-      console.error('Error creating project:', error);
+      console.error("Error creating project:", error);
     }
   };
 
   const updateFormData = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleMemberToggle = (memberId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      assigned_members: prev.assigned_members.includes(memberId)
-        ? prev.assigned_members.filter(id => id !== memberId)
-        : [...prev.assigned_members, memberId]
+      [field]: value,
     }));
   };
 
@@ -83,16 +88,20 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>เพิ่มโครงการใหม่</DialogTitle>
-          <DialogDescription>
+
+      {/* Mobile-first: กว้างพอดีจอ สูงไม่เกิน 85vh และเลื่อนภายในได้ */}
+      <DialogContent className="w-[92vw] sm:w-full sm:max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="text-base sm:text-lg">เพิ่มโครงการใหม่</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             สร้างโครงการใหม่และระบุรายละเอียดต่างๆ
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          {/* ชื่อ/สถานที่ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-1.5">
               <Label htmlFor="name">ชื่อโครงการ</Label>
               <Input
                 id="name"
@@ -102,7 +111,7 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="location">สถานที่</Label>
               <Input
                 id="location"
@@ -114,18 +123,21 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
             </div>
           </div>
 
-          <div className="space-y-2">
+          {/* รายละเอียด */}
+          <div className="space-y-1.5">
             <Label htmlFor="description">รายละเอียด</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => updateFormData("description", e.target.value)}
               placeholder="อธิบายโครงการ..."
+              className="min-h-24"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          {/* วันที่เริ่ม/สิ้นสุด */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-1.5">
               <Label htmlFor="start_date">วันที่เริ่ม</Label>
               <Input
                 id="start_date"
@@ -135,7 +147,7 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="end_date">วันที่สิ้นสุด</Label>
               <Input
                 id="end_date"
@@ -147,12 +159,16 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
+          {/* สถานะ / ทีม / งบประมาณ */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="space-y-1.5">
               <Label htmlFor="status">สถานะ</Label>
-              <Select value={formData.status} onValueChange={(value) => updateFormData("status", value)}>
-                <SelectTrigger>
-                  <SelectValue />
+              <Select
+                value={formData.status}
+                onValueChange={(value) => updateFormData("status", value)}
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="เลือกสถานะ" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pending">รอเริ่มงาน</SelectItem>
@@ -161,15 +177,21 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+
+            <div className="space-y-1.5">
               <Label htmlFor="team_name">ชุดทีมงาน</Label>
-              <Select value={formData.team_name} onValueChange={(value) => updateFormData("team_name", value)}>
-                <SelectTrigger>
+              <Select
+                value={formData.team_name}
+                onValueChange={(value) => updateFormData("team_name", value)}
+              >
+                <SelectTrigger id="team_name">
                   <SelectValue placeholder="เลือกพนักงานที่ปฏิบัติงาน" />
                 </SelectTrigger>
                 <SelectContent>
                   {activeTeamMembers.length === 0 ? (
-                    <SelectItem value="" disabled>ไม่มีพนักงานที่ปฏิบัติงาน</SelectItem>
+                    <SelectItem value="" disabled>
+                      ไม่มีพนักงานที่ปฏิบัติงาน
+                    </SelectItem>
                   ) : (
                     activeTeamMembers.map((member) => (
                       <SelectItem key={member.id} value={member.name}>
@@ -180,23 +202,34 @@ const AddProjectDialog = ({ children }: AddProjectDialogProps) => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+
+            <div className="space-y-1.5">
               <Label htmlFor="budget">งบประมาณ (บาท)</Label>
               <Input
                 id="budget"
                 type="number"
                 min="0"
+                inputMode="numeric"
                 value={formData.budget}
-                onChange={(e) => updateFormData("budget", parseInt(e.target.value))}
+                onChange={(e) =>
+                  updateFormData("budget", Number(e.target.value) || 0)
+                }
                 required
               />
             </div>
           </div>
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+
+          {/* ปุ่ม: มือถือให้เต็มความกว้าง */}
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="w-full sm:w-auto"
+            >
               ยกเลิก
             </Button>
-            <Button type="submit" className="bg-gradient-primary">
+            <Button type="submit" className="bg-gradient-primary w-full sm:w-auto">
               สร้างโครงการ
             </Button>
           </div>

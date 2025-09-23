@@ -135,7 +135,7 @@ const MaterialRequest = () => {
                       className="bg-gradient-primary text-white border-0 hover-scale w-full sm:w-auto"
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      วัสดุเบิกเข้าโครงการนัีนๆ
+                      วัสดุเบิกเข้าโครงการนั้นๆ
                     </Button>
                     <MaterialRequestForm />
                   </div>

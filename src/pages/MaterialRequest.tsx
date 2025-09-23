@@ -135,7 +135,7 @@ const MaterialRequest = () => {
                       className="bg-gradient-primary text-white border-0 hover-scale w-full sm:w-auto"
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      สรุปอุปกรณ์
+                      วัสดุเบิกเข้าโครงการนัีนๆ
                     </Button>
                     <MaterialRequestForm />
                   </div>
@@ -250,15 +250,6 @@ const MaterialRequest = () => {
                                 วันที่เบิก: {new Date(request.request_date).toLocaleDateString('th-TH')}
                               </div>
                               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => navigate('/material-tracking')}
-                                  className="w-full sm:w-auto hover-scale"
-                                >
-                                  <Eye className="mr-1 h-3 w-3" />
-                                  ดูรายละเอียด
-                                </Button>
                                 <Button 
                                   size="sm" 
                                   variant="outline" 

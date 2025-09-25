@@ -180,6 +180,10 @@ const ProgressUpdate = () => {
                             )}
 
                             <div className="flex justify-between items-center pt-4 border-t border-border">
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <span>รูปภาพ: {update.photos_url?.length || 0} รูป</span>
+                                <span>รหัส: {update.id}</span>
+                              </div>
                               <div className="flex gap-2">
                                 <EditProgressUpdateDialog update={update} />
                                 <Button 

@@ -11,10 +11,15 @@ import { useProjects } from "@/hooks/useProjects";
 import ImageUpload from "@/components/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 
-const AddProgressUpdateDialog = () => {
+interface AddProgressUpdateDialogProps {
+  defaultProjectId?: string;
+  onSuccess?: () => void;
+}
+
+const AddProgressUpdateDialog = ({ defaultProjectId, onSuccess }: AddProgressUpdateDialogProps) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    project_id: "",
+    project_id: defaultProjectId || "",
     description: "",
     progress_percentage: "",
     updated_by: "",
@@ -49,13 +54,18 @@ const AddProgressUpdateDialog = () => {
       });
       
       setFormData({
-        project_id: "",
+        project_id: defaultProjectId || "",
         description: "",
         progress_percentage: "",
         updated_by: "",
         photos_url: []
       });
       setOpen(false);
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Error submitting progress update:', error);
     }

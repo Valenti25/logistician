@@ -6,18 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
-import { ArrowLeft, MapPin, Calendar, Users, DollarSign, Package, ClipboardList, TrendingUp, User } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Users, DollarSign, Package, ClipboardList, TrendingUp, User, Plus } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useProgressUpdates } from "@/hooks/useProgressUpdates";
 import { useMaterialRequests } from "@/hooks/useMaterialRequests";
 import { useMaterialTracking } from "@/hooks/useMaterialTracking";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
+import AddProgressUpdateDialog from "@/components/AddProgressUpdateDialog";
 
 const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { projects, loading: projectLoading } = useProjects();
-  const { progressUpdates, loading: progressLoading } = useProgressUpdates();
+  const { progressUpdates, loading: progressLoading, refetch: refetchProgressUpdates } = useProgressUpdates();
   const { materialRequests, loading: requestsLoading } = useMaterialRequests();
   const { materialTracking, loading: trackingLoading } = useMaterialTracking();
   const { teamMembers, loading: teamLoading } = useTeamMembers();
@@ -217,8 +218,14 @@ const ProjectDetails = () => {
                   </TabsList>
 
                   <TabsContent value="progress" className="mt-6">
-                    <CardHeader className="px-0">
-                      <CardTitle className="text-lg">รายงานความคืบหน้า</CardTitle>
+                    <CardHeader className="px-0 pb-4">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-lg">รายงานความคืบหน้า</CardTitle>
+                        <AddProgressUpdateDialog 
+                          defaultProjectId={project.id} 
+                          onSuccess={refetchProgressUpdates}
+                        />
+                      </div>
                     </CardHeader>
                     <div className="space-y-4">
                       {progressLoading ? (

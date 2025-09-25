@@ -177,7 +177,7 @@ const MaterialRequestForm = ({ children }: MaterialRequestFormProps) => {
                 <div className="col-span-3">
                   <Input
                     type="number"
-                    placeholder="จำนวน"
+                    placeholder="จำนวนอุปกรณ์"
                     min="1"
                     value={item.quantity}
                     onChange={(e) => updateItem(index, "quantity", parseFloat(e.target.value))}
@@ -186,7 +186,7 @@ const MaterialRequestForm = ({ children }: MaterialRequestFormProps) => {
                 </div>
                 <div className="col-span-3">
                   <Input
-                    placeholder="หน่วย"
+                    placeholder="จำนวนที่เบิก"
                     value={item.unit}
                     onChange={(e) => updateItem(index, "unit", e.target.value)}
                     required

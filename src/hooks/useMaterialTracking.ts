@@ -92,6 +92,32 @@ export const useMaterialTracking = () => {
     }
   };
 
+  const consumeMaterial = async (projectId: string, description: string, amount: number, date: string) => {
+    try {
+      const target = materialTracking.find(m => m.project_id === projectId && m.description === description);
+      if (!target) throw new Error('ไม่พบวัสดุในโครงการ');
+
+      const newUsed = Number(target.used_quantity) + Number(amount);
+      const newRemaining = Number(target.total_quantity) - newUsed;
+      const newDateUsage = { ...(target.date_usage || {}) };
+      newDateUsage[date] = (newDateUsage[date] || 0) + Number(amount);
+
+      const updated = await updateMaterialTracking(target.id, {
+        used_quantity: newUsed,
+        remaining_quantity: newRemaining,
+        date_usage: newDateUsage
+      });
+      return updated;
+    } catch (error) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกการเบิกวัสดุได้",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   const deleteMaterialTracking = async (id: string) => {
     try {
       const { error } = await supabase
@@ -122,6 +148,7 @@ export const useMaterialTracking = () => {
     createMaterialTracking,
     updateMaterialTracking,
     deleteMaterialTracking,
+    consumeMaterial,
     refetch: fetchMaterialTracking
   };
 };

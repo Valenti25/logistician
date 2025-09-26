@@ -14,6 +14,7 @@ import { useMaterialTracking } from "@/hooks/useMaterialTracking";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import AddProgressUpdateDialog from "@/components/AddProgressUpdateDialog";
 import ImageViewer from "@/components/ImageViewer";
+import MaterialRequestForm from "@/components/MaterialRequestForm";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -204,6 +205,10 @@ const ProjectDetails = () => {
                       <TrendingUp className="h-4 w-4 mr-1" />
                       ความคืบหน้า
                     </TabsTrigger>
+                    <TabsTrigger value="materials" className="text-xs md:text-sm">
+                      <Package className="h-4 w-4 mr-1" />
+                      วัสดุ
+                    </TabsTrigger>
                     <TabsTrigger value="requests" className="text-xs md:text-sm">
                       <ClipboardList className="h-4 w-4 mr-1" />
                       คำขอ
@@ -264,124 +269,91 @@ const ProjectDetails = () => {
                     <div className="space-y-6">
                       <CardHeader className="px-0">
                         <div className="flex justify-between items-center">
-                          <CardTitle className="text-lg">สต็อกวัสดุในโครงการ</CardTitle>
-                          <div className="text-sm text-muted-foreground">
-                            รวม {projectMaterialTracking.length} รายการ
+                          <CardTitle className="text-lg">วัสดุในโครงการ</CardTitle>
+                          <div className="flex items-center gap-4">
+                            <MaterialRequestForm>
+                              <Button size="sm">
+                                <Plus className="h-4 w-4 mr-2" />
+                                เบิกวัสดุใหม่
+                              </Button>
+                            </MaterialRequestForm>
                           </div>
                         </div>
                       </CardHeader>
-                      
+
+                      {/* Approved Material Requests Section */}
                       <div className="space-y-4">
-                        {trackingLoading ? (
-                          <div className="text-center py-12">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                            <div className="text-muted-foreground mt-4">กำลังโหลดข้อมูลวัสดุ...</div>
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-base font-semibold text-primary">วัสดุที่ได้รับอนุมัติ</h3>
+                          <div className="text-sm text-muted-foreground">
+                            รวม {projectMaterialRequests.filter(req => req.status === 'approved' || req.status === 'delivered').length} คำขอ
                           </div>
-                        ) : projectMaterialTracking.length > 0 ? (
+                        </div>
+                        
+                        {requestsLoading ? (
+                          <div className="text-center py-8">
+                            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                            <div className="text-muted-foreground mt-2">กำลังโหลดข้อมูล...</div>
+                          </div>
+                        ) : projectMaterialRequests.filter(req => req.status === 'approved' || req.status === 'delivered').length > 0 ? (
                           <div className="grid gap-4">
-                            {projectMaterialTracking.map((tracking) => {
-                              const remainingQty = tracking.remaining_quantity || tracking.total_quantity - tracking.used_quantity;
-                              const usagePercent = Math.round((tracking.used_quantity / tracking.total_quantity) * 100);
-                              const isLowStock = remainingQty <= tracking.total_quantity * 0.2;
-                              const isOutOfStock = remainingQty <= 0;
-                              
-                              return (
-                                <Card key={tracking.id} className={`bg-background/50 transition-all duration-200 hover:shadow-md ${isOutOfStock ? 'border-destructive/50' : isLowStock ? 'border-warning/50' : ''}`}>
-                                  <CardContent className="p-6">
-                                    <div className="space-y-4">
-                                      {/* Header */}
-                                      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-3">
-                                        <div className="space-y-2">
-                                          <div className="flex items-center gap-2">
-                                            <h3 className="font-semibold text-primary text-lg">{tracking.description}</h3>
-                                            {isOutOfStock && (
-                                              <Badge variant="destructive" className="text-xs">
-                                                หมดสต็อก
-                                              </Badge>
-                                            )}
-                                            {isLowStock && !isOutOfStock && (
-                                              <Badge variant="secondary" className="text-xs bg-warning text-warning-foreground">
-                                                สต็อกน้อย
-                                              </Badge>
-                                            )}
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="text-xs">
-                                              {tracking.category}
-                                            </Badge>
-                                            <span className="text-sm text-muted-foreground">
-                                              อัพเดท: {formatDate(tracking.updated_at)}
-                                            </span>
-                                          </div>
-                                        </div>
+                            {projectMaterialRequests
+                              .filter(req => req.status === 'approved' || req.status === 'delivered')
+                              .map((request) => (
+                              <Card key={request.id} className="bg-background/30">
+                                <CardContent className="p-4">
+                                  <div className="flex justify-between items-start mb-3">
+                                    <div className="space-y-1">
+                                      <div className="font-medium text-primary">{request.request_code}</div>
+                                      <div className="text-sm text-muted-foreground">
+                                        ผู้ขอ: {request.requester_name}
                                       </div>
-                                      
-                                      {/* Quantity Overview */}
-                                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                        <div className="text-center p-4 bg-primary/5 rounded-lg border border-primary/20">
-                                          <div className="text-2xl font-bold text-primary">{tracking.total_quantity}</div>
-                                          <div className="text-sm text-muted-foreground">ปริมาณทั้งหมด</div>
-                                        </div>
-                                        <div className="text-center p-4 bg-destructive/5 rounded-lg border border-destructive/20">
-                                          <div className="text-2xl font-bold text-destructive">{tracking.used_quantity}</div>
-                                          <div className="text-sm text-muted-foreground">ใช้ไปแล้ว</div>
-                                        </div>
-                                        <div className={`text-center p-4 rounded-lg border ${isOutOfStock ? 'bg-destructive/5 border-destructive/20' : isLowStock ? 'bg-warning/5 border-warning/20' : 'bg-success/5 border-success/20'}`}>
-                                          <div className={`text-2xl font-bold ${isOutOfStock ? 'text-destructive' : isLowStock ? 'text-warning' : 'text-success'}`}>
-                                            {remainingQty}
-                                          </div>
-                                          <div className="text-sm text-muted-foreground">คงเหลือ</div>
-                                        </div>
-                                        <div className="text-center p-4 bg-muted/30 rounded-lg border">
-                                          <div className="text-2xl font-bold text-foreground">{usagePercent}%</div>
-                                          <div className="text-sm text-muted-foreground">การใช้งาน</div>
-                                        </div>
+                                      <div className="text-sm text-muted-foreground">
+                                        วันที่: {formatDate(request.request_date)}
                                       </div>
-                                      
-                                      {/* Progress Bar */}
-                                      <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                          <span className="text-muted-foreground">ความคืบหน้าการใช้วัสดุ</span>
-                                          <span className="font-medium text-primary">{usagePercent}%</span>
-                                        </div>
-                                        <Progress 
-                                          value={usagePercent} 
-                                          className={`h-3 ${isOutOfStock ? '[&>div]:bg-destructive' : isLowStock ? '[&>div]:bg-warning' : ''}`}
-                                        />
-                                        <div className="flex justify-between text-xs text-muted-foreground">
-                                          <span>0</span>
-                                          <span>{tracking.total_quantity}</span>
-                                        </div>
-                                      </div>
-                                      
-                                      {/* Daily Usage Info (if available) */}
-                                      {tracking.date_usage && Object.keys(tracking.date_usage).length > 0 && (
-                                        <div className="pt-4 border-t border-border/50">
-                                          <div className="text-sm font-medium text-foreground mb-2">การใช้งานรายวัน (ล่าสุด)</div>
-                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                            {Object.entries(tracking.date_usage)
-                                              .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
-                                              .slice(0, 4)
-                                              .map(([date, quantity]) => (
-                                                <div key={date} className="text-center p-2 bg-muted/20 rounded">
-                                                  <div className="text-xs text-muted-foreground">{formatDate(date)}</div>
-                                                  <div className="font-medium text-sm">{quantity}</div>
-                                                </div>
-                                              ))}
-                                          </div>
-                                        </div>
-                                      )}
                                     </div>
-                                  </CardContent>
-                                </Card>
-                              );
-                            })}
+                                    <div className="flex flex-col items-end gap-2">
+                                      <Badge variant="default">
+                                        {request.status === 'approved' ? 'อนุมัติแล้ว' : 'ส่งของแล้ว'}
+                                      </Badge>
+                                      <Badge variant="outline" className={`text-xs ${
+                                        request.urgency === 'high' ? 'border-destructive text-destructive' :
+                                        request.urgency === 'medium' ? 'border-warning text-warning' : ''
+                                      }`}>
+                                        {request.urgency === 'high' ? 'เร่งด่วน' : 
+                                         request.urgency === 'medium' ? 'ปานกลาง' : 'ปกติ'}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                  
+                                  {request.material_items && request.material_items.length > 0 && (
+                                    <div className="space-y-2">
+                                      <div className="text-sm font-medium text-foreground">รายการวัสดุ:</div>
+                                      <div className="grid gap-2">
+                                        {request.material_items.map((item) => (
+                                          <div key={item.id} className="flex justify-between items-center p-2 bg-muted/20 rounded text-sm">
+                                            <span className="font-medium">{item.item_name}</span>
+                                            <span className="text-muted-foreground">{item.quantity} {item.unit}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {request.notes && (
+                                    <div className="mt-3 pt-3 border-t border-border/50">
+                                      <div className="text-sm text-muted-foreground">หมายเหตุ:</div>
+                                      <p className="text-sm text-foreground mt-1">{request.notes}</p>
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            ))}
                           </div>
                         ) : (
-                          <div className="text-center py-12">
-                            <Package className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                            <div className="text-lg font-medium text-muted-foreground mb-2">ยังไม่มีการติดตามวัสดุ</div>
-                            <div className="text-sm text-muted-foreground">วัสดุจะถูกสร้างอัตโนมัติเมื่อมีการอนุมัติคำขอวัสดุ</div>
+                          <div className="text-center py-12 bg-muted/10 rounded-lg border border-dashed border-muted-foreground/30">
+                            <Package className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                            <div className="text-sm text-muted-foreground">ยังไม่มีวัสดุที่ได้รับอนุมัติ</div>
                           </div>
                         )}
                       </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
 export interface MaterialItem {
   id?: string;
@@ -98,25 +99,6 @@ export const useMaterialRequests = () => {
 
       if (itemsError) throw itemsError;
 
-      // Also create material tracking entries for each item
-      const trackingItems = items.map(item => ({
-        project_id: requestData.project_id,
-        description: item.item_name,
-        category: "เบิกอุปกรณ์แล้ว",
-        total_quantity: item.quantity,
-        used_quantity: 0,
-        remaining_quantity: item.quantity,
-        date_usage: {}
-      }));
-
-      const { error: trackingError } = await supabase
-        .from('material_tracking')
-        .insert(trackingItems);
-
-      if (trackingError) {
-        console.warn('Failed to create tracking entries:', trackingError);
-      }
-
       const newRequest = { ...request, material_items: createdItems } as MaterialRequest;
       setMaterialRequests(prev => [newRequest, ...prev]);
 
@@ -148,6 +130,39 @@ export const useMaterialRequests = () => {
         .single();
 
       if (error) throw error;
+
+      // When approving, apply consumption into material_tracking
+      if (status === 'approved' && data) {
+        const items = (data.material_items || []) as MaterialItem[];
+        // Fetch current tracking rows for the project
+        const { data: tracking, error: trackErr } = await supabaseClient
+          .from('material_tracking')
+          .select('*')
+          .eq('project_id', data.project_id);
+        if (trackErr) throw trackErr;
+
+        const trackingMap = new Map<string, any>();
+        (tracking || []).forEach(row => trackingMap.set(row.description, row));
+
+        // Apply each item's unit as used amount on the request_date
+        for (const item of items) {
+          const row = trackingMap.get(item.item_name);
+          if (!row) continue; // skip unknown items
+          const usedAmount = Number(item.unit || 0);
+          if (!usedAmount) continue;
+
+          const newUsed = Number(row.used_quantity || 0) + usedAmount;
+          const newRemaining = Number(row.total_quantity || 0) - newUsed;
+          const newDateUsage = { ...(row.date_usage || {}) };
+          const dateKey = data.request_date;
+          newDateUsage[dateKey] = Number(newDateUsage[dateKey] || 0) + usedAmount;
+
+          await supabaseClient
+            .from('material_tracking')
+            .update({ used_quantity: newUsed, remaining_quantity: newRemaining, date_usage: newDateUsage })
+            .eq('id', row.id);
+        }
+      }
 
       setMaterialRequests(prev => prev.map(r => r.id === id ? data as MaterialRequest : r));
       toast({

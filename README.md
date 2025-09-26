@@ -1,3 +1,14 @@
+## Environment Variables
+
+Create a `.env` file at the project root with:
+
+```
+VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_ANON_PUBLIC_KEY
+```
+
+Then run the app with `npm run dev`.
+
 # craft-chain-tool
 
 เครื่องมือเว็บแอปที่พัฒนาด้วย Vite + React + TypeScript + shadcn-ui + Tailwind CSS

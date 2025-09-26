@@ -2,8 +2,18 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://fzycijzjmzoxxfyybiwa.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6eWNpanpqbXpveHhmeXliaXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMzE3NTksImV4cCI6MjA3MzYwNzc1OX0.JYJ46iEAPmW8_Z5xaLjDp_P5c5euLLxgcwp5IQH6Xcw";
+const DEFAULT_URL = "https://fzycijzjmzoxxfyybiwa.supabase.co";
+const DEFAULT_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6eWNpanpqbXpveHhmeXliaXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMzE3NTksImV4cCI6MjA3MzYwNzc1OX0.JYJ46iEAPmW8_Z5xaLjDp_P5c5euLLxgcwp5IQH6Xcw";
+
+const SUPABASE_URL = (import.meta as any)?.env?.VITE_SUPABASE_URL || DEFAULT_URL;
+const SUPABASE_PUBLISHABLE_KEY = (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || DEFAULT_ANON;
+
+if (!(import.meta as any)?.env?.VITE_SUPABASE_URL || !(import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[Supabase] VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is missing. Using default public keys. Create a .env file to override."
+  );
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
